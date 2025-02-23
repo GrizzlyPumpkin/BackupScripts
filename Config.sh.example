@@ -1,0 +1,42 @@
+# Used to check if our config is already loaded
+SERVER_BACKUP_SCRIPT=true
+
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
+export RESTIC_PASSWORD=""
+export RESTIC_REPOSITORY=""
+
+NOW=$(date +%F.%H%M%S)
+
+SCRIPTS_ROOT="$(dirname "$0")"
+
+RESTIC_EXCLUDE_FILE="$SCRIPTS_ROOT/ExcludeFiles.txt"
+RESTIC_INCLUDE_FILE="$SCRIPTS_ROOT/IncludeFiles.txt"
+
+BACKUP_COMPLETE_PING=""
+INTEGRITY_CHECK_PING=""
+
+DO_PARTIAL_REPO_CHECK=true
+PARTIAL_REPO_CHECK_SUBSET=5%
+
+DB_BACKUP=false
+DB_EXTRA_OPTIONS="" # --set-gtid-purged=OFF - If needed to suppress warning
+DB_HOST=""
+DB_PORT="3306"
+DB_USER=""
+DB_NAME=""
+DB_PASSWORD_FILE="$SCRIPTS_ROOT/DB.cnf"
+DB_FILE="$SCRIPTS_ROOT/Temp/$NOW.sql.gz"
+
+DRY_RUN=false
+
+RESTIC_DRY_RUN_OPTION="" && [[ "$DRY_RUN" = true ]] && RESTIC_DRY_RUN_OPTION="--dry-run"
+
+source "$SCRIPTS_ROOT/ObtainLock.sh"
+
+# Make directories if they do not exist
+mkdir -p "$SCRIPTS_ROOT/Temp"
+
+if [[ "$DRY_RUN" == true ]]; then
+   echo "!!!!!!!DRY RUN ENABLED!!!!!!!"
+fi

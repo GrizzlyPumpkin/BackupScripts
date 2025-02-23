@@ -1,0 +1,13 @@
+# Logs
+*.log
+
+# App Caches
+images/cache
+app/backblaze_temp
+app/generated_pdfs
+app/pdf_temp
+
+# Laravel Caches
+framework/cache
+framework/sessions
+framework/views
