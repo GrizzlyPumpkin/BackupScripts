@@ -47,6 +47,10 @@ fi
 
 # Function to log messages
 log_message() {
-    DATE=$(date +%F.%H%M%S)
-    echo "[$DATE] $1" >> "$LOG_FILE"
+    if [[ -n "$1" ]]; then
+        DATE=$(date +%F.%H%M%S)
+        echo "[$DATE] $1" >> "$LOG_FILE"
+    else
+        while read data; do log_message "$data"; done;
+    fi
 }
