@@ -39,6 +39,7 @@ source "$SCRIPTS_ROOT/ObtainLock.sh"
 
 # Make directories if they do not exist
 mkdir -p "$SCRIPTS_ROOT/Temp"
+mkdir -p "$LOG_FOLDER"
 
 if [[ "$DRY_RUN" == true ]]; then
    echo "!!!!!!!DRY RUN ENABLED!!!!!!!"
