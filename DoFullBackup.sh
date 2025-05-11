@@ -9,10 +9,10 @@ if [ -z ${SERVER_BACKUP_SCRIPT+x} ]; then source "$(dirname "$0")/Config.sh"; fi
 log_message "Starting backup"
 
 # If DB backups are not needed this script will do nothing
-source "$SCRIPTS_ROOT/DoSqlBackup.sh"
-source "$SCRIPTS_ROOT/DoFileBackup.sh"
-source "$SCRIPTS_ROOT/CleanSqlDump.sh"
-source "$SCRIPTS_ROOT/DoPartialIntegrityCheck.sh"
+(set -o pipefail && source "$SCRIPTS_ROOT/DoSqlBackup.sh")
+(set -o pipefail && source "$SCRIPTS_ROOT/DoFileBackup.sh")
+(set -o pipefail && source "$SCRIPTS_ROOT/CleanSqlDump.sh")
+(set -o pipefail && source "$SCRIPTS_ROOT/DoPartialIntegrityCheck.sh")
 
 if [[ "$BACKUP_COMPLETE_PING" != "" ]]; then
     curl -s --retry 3 $BACKUP_COMPLETE_PING > /dev/null
