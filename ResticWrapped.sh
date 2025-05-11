@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 # Simple wrapper to ensure our config is loaded first
 
 # Load config if not already loaded

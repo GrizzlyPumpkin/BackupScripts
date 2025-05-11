@@ -28,6 +28,9 @@ DB_NAME=""
 DB_PASSWORD_FILE="$SCRIPTS_ROOT/DB.cnf"
 DB_FILE="$SCRIPTS_ROOT/Temp/$NOW.sql.gz"
 
+LOG_FOLDER="/var/log/pumpkin"
+LOG_FILE="$LOG_FOLDER/backups.log"
+
 DRY_RUN=false
 
 RESTIC_DRY_RUN_OPTION="" && [[ "$DRY_RUN" = true ]] && RESTIC_DRY_RUN_OPTION="--dry-run"
@@ -40,3 +43,8 @@ mkdir -p "$SCRIPTS_ROOT/Temp"
 if [[ "$DRY_RUN" == true ]]; then
    echo "!!!!!!!DRY RUN ENABLED!!!!!!!"
 fi
+
+# Function to log messages
+log_message() {
+    echo "[$DATE] $1" >> "$LOG_FILE"
+}
