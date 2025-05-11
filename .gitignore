@@ -2,3 +2,5 @@ Config.sh
 DB.cnf
 Temp/
 Logs/
+IncludeFiles.txt
+ExcludeFiles.txt

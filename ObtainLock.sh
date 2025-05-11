@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 LOCKFILE="/var/lock/doing_server_backup"
 LOCKFD=99
 
