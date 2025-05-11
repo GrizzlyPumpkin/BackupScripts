@@ -8,7 +8,7 @@ if [ -z ${SERVER_BACKUP_SCRIPT+x} ]; then source "$(dirname "$0")/Config.sh"; fi
 
 log_message "Performing full integrity check"
 
-restic check --read-data $RESTIC_DRY_RUN_OPTION 2>&1 | log_message
+restic check --read-data $RESTIC_DRY_RUN_OPTION 2>&1 | log_message $1
 
 if [[ "$INTEGRITY_CHECK_PING" != "" ]]; then
     curl --retry 3 $INTEGRITY_CHECK_PING

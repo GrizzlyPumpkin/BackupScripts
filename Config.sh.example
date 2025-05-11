@@ -47,5 +47,6 @@ fi
 
 # Function to log messages
 log_message() {
+    DATE=$(date +%F.%H%M%S)
     echo "[$DATE] $1" >> "$LOG_FILE"
 }
