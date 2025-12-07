@@ -17,4 +17,7 @@ else
     log_message "Skipping healthcheck ping as not configured"
 fi
 
+# Logging last run time
+date +%s > $INTEGRITY_LAST_RUN_FILE
+
 log_message "Done!"
