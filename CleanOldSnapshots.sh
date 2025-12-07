@@ -10,4 +10,11 @@ log_message "Cleaning up old snapshots older than 30 days"
 
 restic forget --keep-within-daily 30d --group-by "" --prune $RESTIC_DRY_RUN_OPTION 2>&1 | log_message $1
 
-log_message "Cleaning up old snapshots older than 30 days"
+if [[ "$PRUNE_PING" != "" ]]; then
+    curl -s --retry 3 $PRUNE_PING > /dev/null
+    log_message "Pinged healthcheck"
+else
+    log_message "Skipping ping"
+fi
+
+log_message "Cleaned up old snapshots older than 30 days"
