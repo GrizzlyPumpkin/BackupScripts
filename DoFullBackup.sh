@@ -8,6 +8,11 @@ if [ -z ${SERVER_BACKUP_SCRIPT+x} ]; then source "$(dirname "$0")/Config.sh"; fi
 
 log_message "Starting backup"
 
+if [[ "$BACKUP_COMPLETE_PING" != "" ]]; then
+    curl -s --retry 3 "$BACKUP_COMPLETE_PING/start" > /dev/null
+    log_message "Pinged healthcheck start"
+fi
+
 # If DB backups are not needed this script will do nothing
 (set -o pipefail && source "$SCRIPTS_ROOT/DoSqlBackup.sh")
 (set -o pipefail && source "$SCRIPTS_ROOT/DoFileBackup.sh")
@@ -15,10 +20,8 @@ log_message "Starting backup"
 (set -o pipefail && source "$SCRIPTS_ROOT/DoPartialIntegrityCheck.sh")
 
 if [[ "$BACKUP_COMPLETE_PING" != "" ]]; then
-    curl -s --retry 3 $BACKUP_COMPLETE_PING > /dev/null
-    log_message "Pinged healthcheck"
-else
-    log_message "Starting backup"
+    curl -s --retry 3 "$BACKUP_COMPLETE_PING" > /dev/null
+    log_message "Pinged healthcheck complete"
 fi
 
 log_message "Backup done"

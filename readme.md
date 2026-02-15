@@ -30,8 +30,7 @@ MAILTO=email@domain.com
 ## Monthly Integrity Check - 2am 1st
 0 2 1 * * /path/to/BackupScripts/DoIntegrityCheck.sh 2>&1
 
-## Daily check that integrity has run recently, for monitoring - 3am
-0 3 * * * /home/docgb/BackupScripts/IntegrityCheckDailyPing.sh 2>&1
+
 ```
 
 ## Restoring
