@@ -7,7 +7,13 @@ set -e
 NEEDS_LOCK=true
 if [ -z "${SERVER_BACKUP_SCRIPT+x}" ]; then source "$(dirname "$0")/Init.sh"; fi
 
+# Send a fail ping if the script exits with an error
+trap 'send_fail_ping "$PRUNE_PING"' EXIT
+
 log_message "Cleaning up old snapshots older than 30 days"
+
+# Pre-flight checks
+preflight_check_repo || exit 1
 
 if [[ -n "$PRUNE_PING" ]]; then
     curl -s --retry 3 "$PRUNE_PING/start" > /dev/null || log_message "Warning: healthcheck start ping failed"
@@ -23,3 +29,6 @@ if [[ -n "$PRUNE_PING" ]]; then
 fi
 
 log_message "Cleaned up old snapshots older than 30 days"
+
+# Clear the EXIT trap so a successful run does not send a fail ping
+trap - EXIT

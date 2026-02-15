@@ -27,6 +27,7 @@ LOG_FILE="$LOG_FOLDER/backups.log"
 # Defaults for optional config values (can be overridden in Config.sh)
 DO_PARTIAL_REPO_CHECK="${DO_PARTIAL_REPO_CHECK:-true}"
 PARTIAL_REPO_CHECK_SUBSET="${PARTIAL_REPO_CHECK_SUBSET:-5%}"
+DB_MIN_DISK_MB="${DB_MIN_DISK_MB:-2048}" # Minimum free disk space (MB) required for SQL dumps
 
 # Dry run support (can be set in Config.sh or via environment variable)
 DRY_RUN="${DRY_RUN:-false}"
@@ -51,6 +52,35 @@ log_message() {
         while IFS= read -r data || [[ -n "$data" ]]; do
             log_message "$data"
         done
+    fi
+}
+
+# Send a /fail ping to a healthchecks.io endpoint
+send_fail_ping() {
+    local ping_url="$1"
+    if [[ -n "$ping_url" ]]; then
+        curl -s --retry 3 "$ping_url/fail" > /dev/null || log_message "Warning: healthcheck fail ping failed"
+    fi
+}
+
+# Verify the restic repository is reachable and credentials work
+preflight_check_repo() {
+    log_message "Pre-flight: checking repository connectivity"
+    if ! restic cat config > /dev/null 2>&1; then
+        log_message "FATAL: Cannot reach restic repository. Check credentials and network."
+        return 1
+    fi
+}
+
+# Verify sufficient disk space for SQL dump (only relevant when DB_BACKUP=true)
+preflight_check_disk_space() {
+    if [[ "$DB_BACKUP" != true ]]; then return 0; fi
+    log_message "Pre-flight: checking disk space for SQL dump"
+    local available_mb
+    available_mb=$(df -BM --output=avail "$SCRIPTS_ROOT/Temp" | tail -1 | tr -d ' M')
+    if (( available_mb < DB_MIN_DISK_MB )); then
+        log_message "FATAL: Insufficient disk space. Available: ${available_mb}MB, required: ${DB_MIN_DISK_MB}MB"
+        return 1
     fi
 }
 

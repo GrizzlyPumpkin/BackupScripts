@@ -39,6 +39,35 @@ MAILTO=email@domain.com
 0 2 1 * * /path/to/BackupScripts/DoIntegrityCheck.sh 2>&1
 ```
 
+## Logrotate
+
+The scripts log to `/var/log/pumpkin/backups.log`. Configure logrotate to prevent unbounded growth. Create `/etc/logrotate.d/pumpkin-backups`:
+```
+/var/log/pumpkin/*.log {
+        daily
+        missingok
+        rotate 2
+        compress
+        notifempty
+        minsize 5M
+}
+```
+
+## Email Alerts
+
+Cron's `MAILTO` provides a secondary alerting mechanism. Any output to stderr (e.g. from a failed command) will be emailed. Verify email delivery is working on each server by installing `mailutils` and testing with:
+```
+echo "Test" | mail -s "Cron test" your@email.com
+```
+
+## Pre-flight Checks
+
+Before each run, the entry-point scripts perform pre-flight checks:
+- **Repository connectivity** — verifies the restic repository is reachable and credentials work. Runs before DoFullBackup, CleanOldSnapshots, and DoIntegrityCheck.
+- **Disk space** — verifies sufficient free space for the SQL dump (default 2GB minimum, configurable via `DB_MIN_DISK_MB` in Config.sh). Only runs when `DB_BACKUP=true`.
+
+If any pre-flight check fails, the script sends a `/fail` ping to the relevant healthchecks.io endpoint for immediate alerting, then exits. Any other failure during the backup also triggers a `/fail` ping via an EXIT trap.
+
 ## Locking
 
 The scripts use `flock` to prevent concurrent runs. The lock file is at `/var/lock/doing_server_backup`. Only scripts that modify the repository (DoFullBackup, CleanOldSnapshots, DoIntegrityCheck) acquire the lock. `ResticWrapped.sh` does not lock, so read-only commands like `snapshots` or `ls` work while a backup is running.
