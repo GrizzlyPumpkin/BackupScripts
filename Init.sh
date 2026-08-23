@@ -32,6 +32,13 @@ DB_MIN_DISK_MB="${DB_MIN_DISK_MB:-2048}" # Minimum free disk space (MB) required
 # Dry run support (can be set in Config.sh or via environment variable)
 DRY_RUN="${DRY_RUN:-false}"
 
+# Backend-specific options used by restic backup. Keep S3 tuning for existing
+# repositories without passing S3-only options to other restic backends.
+RESTIC_BACKUP_BACKEND_OPTIONS=()
+if [[ "$RESTIC_REPOSITORY" == s3:* ]]; then
+    RESTIC_BACKUP_BACKEND_OPTIONS=(--option s3.connections=8)
+fi
+
 if [[ "$DRY_RUN" = true ]]; then
     RESTIC_DRY_RUN_OPTION="--dry-run"
 else
@@ -84,14 +91,26 @@ preflight_check_disk_space() {
     fi
 }
 
-# Validate critical config
-for var in RESTIC_REPOSITORY RESTIC_PASSWORD AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+# Validate config required by every restic backend
+for var in RESTIC_REPOSITORY RESTIC_PASSWORD; do
     if [[ -z "${!var}" ]]; then
         log_message "FATAL: $var is not set in Config.sh"
         echo "FATAL: $var is not set in Config.sh" >&2
         exit 1
     fi
 done
+
+# S3 repositories require AWS credentials. Other backends validate their own
+# credentials and connectivity through restic during the pre-flight check.
+if [[ "$RESTIC_REPOSITORY" == s3:* ]]; then
+    for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+        if [[ -z "${!var}" ]]; then
+            log_message "FATAL: $var is not set in Config.sh for S3 repository"
+            echo "FATAL: $var is not set in Config.sh for S3 repository" >&2
+            exit 1
+        fi
+    done
+fi
 
 command -v restic >/dev/null 2>&1 || { log_message "FATAL: restic not found in PATH"; echo "FATAL: restic not found in PATH" >&2; exit 1; }
 

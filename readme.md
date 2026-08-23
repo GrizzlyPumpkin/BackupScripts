@@ -5,8 +5,13 @@
     - `chmod 700 *.sh` for all scripts
     - `chmod 600 Config.sh DB.cnf` for files containing credentials
 3. Copy `Config.sh.example` to `Config.sh` and fill in your values. Copy `DB.cnf.example` to `DB.cnf` and update password, if needed
-4. Update config based on needed features/repository
-    1. Example Backblaze repo string: `export RESTIC_REPOSITORY="s3:s3.eu-central-003.backblazeb2.com/grizzly-pumpkin-client-backups/CLIENT/OPTIONAL_FOLDER"`
+4. Update config based on needed features and repository type. Restic selects the backend from `RESTIC_REPOSITORY`; no separate backend setting is needed. Examples:
+    - S3: `export RESTIC_REPOSITORY="s3:s3.example.com/bucket/path"`
+    - Backblaze S3-compatible storage: `export RESTIC_REPOSITORY="s3:repo"`
+    - SFTP with an absolute path: `export RESTIC_REPOSITORY="sftp:user@host:/srv/restic-repo"`
+    - SFTP with a path relative to the remote user's home: `export RESTIC_REPOSITORY="sftp:host:backups/restic"`
+    - Local directory: `export RESTIC_REPOSITORY="/srv/restic-repo"`
+    - Other Restic backends, such as REST, B2, Azure, and rclone, can use their standard repository strings and credential environment variables in `Config.sh`.
 5. If using Backblaze, ensure the key is scoped to the bucket and client folder
 6. Install restic from the pre-compiled binary
     1. From github download bz2 release
@@ -17,6 +22,12 @@
 7. Run `./ResticWrapped.sh init` to setup repo
 8. Verify emails are able to be sent on server by installing mailutils
 9. Setup cron based on the schedule below, ensuring MAILTO is defined
+
+### SFTP Setup
+
+SFTP repositories use the SSH configuration of the account that runs the backup cron job. The server must have `ssh` installed and that account must have non-interactive public-key authentication to the repository host, the remote host key in its `known_hosts` file, and permission to read and write the repository directory.
+
+Test the SSH connection as the cron account before running `./ResticWrapped.sh init`. The scripts do not manage SSH passwords, keys, or host-key verification.
 
 ## File Structure
 
@@ -96,3 +107,4 @@ If upgrading from a version where `Config.sh` contained both config and logic:
 1. `git pull` to get the new files including `Init.sh`
 2. Edit your existing `Config.sh` and remove everything except variable declarations (credentials, ping URLs, DB settings). See `Config.sh.example` for the expected format.
 3. `chmod 700 Init.sh`
+4. Existing S3 configurations need no changes. For non-S3 repositories, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` may be left empty; export any credentials required by the selected Restic backend from `Config.sh`.

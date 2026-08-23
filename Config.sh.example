@@ -2,11 +2,13 @@
 # Copy this file to Config.sh and fill in your values.
 # This file should contain ONLY variable declarations - all logic is in Init.sh.
 
-# Restic repository credentials
-export AWS_ACCESS_KEY_ID=""
-export AWS_SECRET_ACCESS_KEY=""
+# Restic repository configuration (required for every backend)
 export RESTIC_PASSWORD=""
 export RESTIC_REPOSITORY=""
+
+# AWS credentials (required only when RESTIC_REPOSITORY uses the s3: backend)
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
 
 # Healthcheck ping URLs (leave empty to disable)
 BACKUP_COMPLETE_PING=""
