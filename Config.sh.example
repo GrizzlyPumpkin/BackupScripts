@@ -15,6 +15,16 @@ BACKUP_COMPLETE_PING=""
 INTEGRITY_CHECK_PING=""
 PRUNE_PING=""
 
+# Optional shell commands run immediately before and after the restic backup.
+# Both are skipped during dry runs. The after hook also runs if the before hook
+# or backup fails, making it suitable for cleanup.
+BEFORE_BACKUP_HOOK=""
+AFTER_BACKUP_HOOK=""
+
+# Example: create a SQL dump that is included by IncludeFiles.txt, then remove it.
+# BEFORE_BACKUP_HOOK='mysqldump --defaults-file=/path/to/DB.cnf database | gzip > /path/to/database.sql.gz'
+# AFTER_BACKUP_HOOK='rm -f /path/to/database.sql.gz'
+
 # Database backup (set DB_BACKUP=true to enable)
 DB_BACKUP=false
 DB_EXTRA_OPTIONS="" # e.g. --set-gtid-purged=OFF

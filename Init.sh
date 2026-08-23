@@ -29,6 +29,12 @@ DO_PARTIAL_REPO_CHECK="${DO_PARTIAL_REPO_CHECK:-true}"
 PARTIAL_REPO_CHECK_SUBSET="${PARTIAL_REPO_CHECK_SUBSET:-5%}"
 DB_MIN_DISK_MB="${DB_MIN_DISK_MB:-2048}" # Minimum free disk space (MB) required for SQL dumps
 
+# Optional commands run immediately before and after the restic backup. These
+# are evaluated in a subshell so they can use shell syntax and config variables
+# without changing the state of the backup process.
+BEFORE_BACKUP_HOOK="${BEFORE_BACKUP_HOOK:-}"
+AFTER_BACKUP_HOOK="${AFTER_BACKUP_HOOK:-}"
+
 # Dry run support (can be set in Config.sh or via environment variable)
 DRY_RUN="${DRY_RUN:-false}"
 
@@ -67,6 +73,23 @@ log_message() {
         while IFS= read -r data || [[ -n "$data" ]]; do
             log_message "$data"
         done
+    fi
+}
+
+# Run a configured backup hook and include its output in the backup log.
+run_backup_hook() {
+    local hook_name="$1"
+    local hook_command="$2"
+
+    if [[ -z "$hook_command" ]]; then return 0; fi
+
+    log_message "Running $hook_name backup hook"
+    if (eval "$hook_command") 2>&1 | log_message; then
+        log_message "Finished $hook_name backup hook"
+    else
+        local hook_status=$?
+        log_message "FATAL: $hook_name backup hook failed with exit code $hook_status"
+        return "$hook_status"
     fi
 }
 

@@ -95,6 +95,31 @@ Set `DRY_RUN=true` in Config.sh or pass it via environment variable:
 DRY_RUN=true ./DoFullBackup.sh
 ```
 
+Configured backup hooks are skipped during a dry run so commands with side
+effects, such as creating or deleting a database dump, are not executed.
+
+## Backup Hooks
+
+Set `BEFORE_BACKUP_HOOK` and/or `AFTER_BACKUP_HOOK` in `Config.sh` to run custom
+shell commands immediately before and after the restic file backup. Hook output
+is written to the backup log, and a non-zero exit status fails the backup.
+
+The after hook is also run when the before hook or file backup fails. This makes
+it appropriate for cleaning up temporary files without leaving them behind after
+an interrupted backup. It runs before the partial integrity check because the
+temporary file is no longer needed once restic has finished reading it.
+
+For example, create a SQL dump in a path listed by `IncludeFiles.txt`, include it
+in the backup, and remove it afterward:
+
+```bash
+BEFORE_BACKUP_HOOK='mysqldump --defaults-file=/path/to/DB.cnf database | gzip > /path/to/database.sql.gz'
+AFTER_BACKUP_HOOK='rm -f /path/to/database.sql.gz'
+```
+
+Hooks support normal shell syntax, including pipes and multiple commands. Quote
+the full command as shown so it is stored as a single configuration value.
+
 ## Console Output
 
 By default, successful script and Restic output is written only to `/var/log/pumpkin/backups.log`. To also return the same timestamped output to the caller, set `OUTPUT_TO_CONSOLE=true` in `Config.sh` or enable it for a single run:
