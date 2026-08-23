@@ -32,6 +32,9 @@ DB_MIN_DISK_MB="${DB_MIN_DISK_MB:-2048}" # Minimum free disk space (MB) required
 # Dry run support (can be set in Config.sh or via environment variable)
 DRY_RUN="${DRY_RUN:-false}"
 
+# Optional output mirroring (can be set in Config.sh or via environment variable)
+OUTPUT_TO_CONSOLE="${OUTPUT_TO_CONSOLE:-false}"
+
 # Backend-specific options used by restic backup. Keep S3 tuning for existing
 # repositories without passing S3-only options to other restic backends.
 RESTIC_BACKUP_BACKEND_OPTIONS=()
@@ -53,8 +56,13 @@ mkdir -p "$LOG_FOLDER"
 log_message() {
     if [[ -n "$1" ]]; then
         local DATE
+        local FORMATTED_MESSAGE
         DATE=$(date +%F.%H%M%S)
-        echo "[$DATE] $1" >> "$LOG_FILE"
+        FORMATTED_MESSAGE="[$DATE] $1"
+        echo "$FORMATTED_MESSAGE" >> "$LOG_FILE"
+        if [[ "$OUTPUT_TO_CONSOLE" == true ]]; then
+            echo "$FORMATTED_MESSAGE"
+        fi
     else
         while IFS= read -r data || [[ -n "$data" ]]; do
             log_message "$data"

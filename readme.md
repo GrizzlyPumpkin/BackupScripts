@@ -95,7 +95,17 @@ Set `DRY_RUN=true` in Config.sh or pass it via environment variable:
 DRY_RUN=true ./DoFullBackup.sh
 ```
 
+## Console Output
+
+By default, successful script and Restic output is written only to `/var/log/pumpkin/backups.log`. To also return the same timestamped output to the caller, set `OUTPUT_TO_CONSOLE=true` in `Config.sh` or enable it for a single run:
+```
+OUTPUT_TO_CONSOLE=true ./DoFullBackup.sh
+```
+
+This is useful for interactive runs and callers that capture stdout. When enabled for cron jobs, successful output may cause cron to send email if `MAILTO` is configured.
+
 ## Restoring
+
 1. Identify snapshot with files to restore using `./ResticWrapped.sh snapshots`
 2. List files in snapshot `./ResticWrapped.sh ls --long $SNAPSHOTID <optional path>`
 3. Restore whole snapshot to another location `./ResticWrapped.sh restore --target=/new/path $SNAPSHOT_ID`

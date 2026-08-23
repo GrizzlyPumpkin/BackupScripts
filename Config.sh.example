@@ -25,6 +25,7 @@ DB_NAME=""
 
 # Uncomment to override defaults:
 # DRY_RUN=false
+# OUTPUT_TO_CONSOLE=false
 # DO_PARTIAL_REPO_CHECK=true
 # PARTIAL_REPO_CHECK_SUBSET=5%
 # DB_MIN_DISK_MB=2048
